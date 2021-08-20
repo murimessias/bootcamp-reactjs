@@ -63,4 +63,7 @@ form.addEventListener("submit", (e) => {
   });
 
   table.appendChild(tr);
+
+  e.target.reset();
+  image.focus();
 });

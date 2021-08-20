@@ -66,4 +66,4 @@ function createOption(color) {
 
 select.setAttribute("multiple", "");
 form.appendChild(select);
-document.body.appendChild(colorsContainer);
+form.appendChild(colorsContainer);

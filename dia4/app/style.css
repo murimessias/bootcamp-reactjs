@@ -1,0 +1,27 @@
+body {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+}
+
+form {
+  margin-bottom: 60px;
+}
+
+form div {
+  margin-bottom: 0.75rem;
+}
+
+label {
+  display: block;
+}
+
+.cars {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cars table {
+  margin-left: 2rem;
+}

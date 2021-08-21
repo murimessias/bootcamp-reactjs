@@ -1,5 +1,5 @@
 import "./style.css";
-import { get, post } from "./http";
+import { get, post, del } from "./http";
 
 function $(selector) {
   return document.querySelector(selector);
@@ -56,13 +56,13 @@ form.addEventListener("submit", async (e) => {
   };
 
   // Fazer a chamada post para cadastrar o carro na API
-  // caso dê erro, avisar no console o erro e caso dê sucesso
+  // caso dê erro, avisar o erro e caso dê sucesso
   // remover o aviso que não há dados na tabela e criar visualmente
   // a tabela com os dados do carro cadastrado
   const result = await post(url, data);
 
   if (result.error) {
-    console.log("Erro ao cadastrar", result.message);
+    setError(result.message);
     return;
   }
 
@@ -87,39 +87,77 @@ function createTableRow(data) {
     { type: "color", value: data.color },
   ];
 
+  tr.dataset.plate = data.plate;
+
   elements.forEach((element) => {
     const td = elementTypes[element.type](element.value);
     tr.appendChild(td);
   });
 
+  const button = document.createElement("button");
+  button.textContent = "Excluir";
+  button.dataset.plate = data.plate;
+  button.addEventListener("click", handleDelete);
+
+  tr.appendChild(button);
+
   table.appendChild(tr);
 }
 
+// Função para a deleção de um dado específico da
+// tabela e remoção do botão de deletar
+async function handleDelete(e) {
+  const button = e.target;
+  const plate = button.dataset.plate;
+
+  const result = await del(url, { plate });
+
+  if (result.error) {
+    setError(result.message);
+    return;
+  }
+
+  const tr = $(`tr[data-plate="${plate}"]`);
+  table.removeChild(tr);
+  button.removeEventListener("click", handleDelete);
+
+  const allTrs = table.querySelector("tr");
+  if (!allTrs) {
+    createNoCarRow();
+  }
+}
+
 // Função de criação de linha com erro para ser exibida na tabela
-function createNoCarRow(message) {
+function createNoCarRow() {
   const tr = document.createElement("tr");
   const td = document.createElement("td");
   const ths = document.querySelectorAll("table th");
   td.setAttribute("colspan", ths.length);
-  td.textContent = message;
+  td.textContent = "Nenhum carro encontrado!";
 
   tr.dataset.js = "no-content";
   tr.appendChild(td);
   table.appendChild(tr);
 }
 
+function setError(message) {
+  const error = $('[data-js="error"]');
+  error.classList.toggle("hide");
+  error.textContent = message;
+}
+
 async function main() {
   const result = await get(url);
 
   if (result.error) {
-    console.log("Erro ao buscar carros", result.message);
+    setError(result.message);
     return;
   }
 
   // Executar função para exibir mensagem avisando que não
   // há nenhum carro cadastrado.
   if (result.length === 0) {
-    createNoCarRow("Nenhum carro encontrado!");
+    createNoCarRow();
   }
 
   // Quando resultado for obtido com sucesso, executar a função

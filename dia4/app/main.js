@@ -1,4 +1,5 @@
 import "./style.css";
+import { get, post } from "./http";
 
 function $(selector) {
   return document.querySelector(selector);
@@ -42,7 +43,7 @@ function createColor(value) {
   return td;
 }
 
-form.addEventListener("submit", (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const getElement = getFormElement(e);
 
@@ -54,6 +55,19 @@ form.addEventListener("submit", (e) => {
     color: getElement("color").value,
   };
 
+  // Fazer a chamada post para cadastrar o carro na API
+  // caso dê erro, avisar no console o erro e caso dê sucesso
+  // remover o aviso que não há dados na tabela e criar visualmente
+  // a tabela com os dados do carro cadastrado
+  const result = await post(url, data);
+
+  if (result.error) {
+    console.log("Erro ao cadastrar", result.message);
+    return;
+  }
+
+  const noContent = $('[data-js="no-content"]');
+  table.removeChild(noContent);
   createTableRow(data);
 
   e.target.reset();
@@ -89,14 +103,13 @@ function createNoCarRow(message) {
   td.setAttribute("colspan", ths.length);
   td.textContent = message;
 
+  tr.dataset.js = "no-content";
   tr.appendChild(td);
   table.appendChild(tr);
 }
 
 async function main() {
-  const result = await fetch(url)
-    .then((r) => r.json())
-    .catch((e) => ({ error: true, message: e.message }));
+  const result = await get(url);
 
   if (result.error) {
     console.log("Erro ao buscar carros", result.message);
